@@ -15,8 +15,8 @@ PRE_GOAL_DURATION = 10   # Seconds before goal
 POST_GOAL_DURATION = 10  # Seconds after goal
 
 # Goal Detection Configuration
-CONFIDENCE_THRESHOLD = 0.6
-NMS_THRESHOLD = 0.3
+CONFIDENCE_THRESHOLD = 0.45
+NMS_THRESHOLD = 0.4
 GOAL_DETECTION_KEYWORDS = [
     'goal', 'celebration', 'net', 'keeper', 'score',
     'ball in net', 'goalkeeper beaten'
