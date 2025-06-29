@@ -25,14 +25,11 @@ This project implements an end-to-end pipeline for automatically detecting goals
 * **S3 Upload**: Automatic uploading of highlight clips to AWS S3 bucket
 * **Bucket Check**: Validates and creates bucket if needed
 * **Secure**: Server-side AES256 encryption
-* **Resilient**: Retry logic and error logging
 
 ### 4. Production Ready
 
 * **Logging**: Detailed logging across all modules
 * **Cleanup**: Temporary files removed post-processing
-* **Environment Configurable**: Centralized config in `.env`
-* **Testing Suite**: Includes unit and integration tests
 
 ## Technical Architecture
 
@@ -76,7 +73,7 @@ This project implements an end-to-end pipeline for automatically detecting goals
 3. **Celebration Detection**:
 
    * Frame-wise clustering of player positions
-   * High clustering (e.g., >6 players close together) indicates celebration
+   * High clustering (e.g., >3 players close together) indicates celebration
 
 4. **Score Calculation**:
 
