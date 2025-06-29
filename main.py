@@ -188,10 +188,6 @@ def main():
     
     args = parser.parse_args()
     
-    # Set debug mode
-    if args.debug:
-        logging.getLogger().setLevel(logging.DEBUG)
-        os.environ['DEBUG_MODE'] = 'True'
     
     # Initialize pipeline
     pipeline = FootballHighlightPipeline()
