@@ -85,19 +85,21 @@ class FootballGoalDetector:
             score = 0.0
             persons = detections.get('persons', [])
             
-            if len(persons) > 6:
+            if len(persons) >= 4:
                 positions = [[p['bbox'][0] + p['bbox'][2]/2, p['bbox'][1] + p['bbox'][3]/2] 
                            for p in persons]
                 
                 if len(positions) >= 2:
                     positions = np.array(positions)
-                    n_clusters = min(6, len(positions))
+                    n_clusters = min(3, len(positions))
                     kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
                     try:
                         clusters = kmeans.fit_predict(positions)
                         cluster_sizes = np.bincount(clusters)
-                        max_cluster_size = np.max(cluster_sizes)
-                        score += max_cluster_size / len(persons)
+                        max_cluster_size = np.max(cluster_sizes)   
+                        avg_cluster = np.mean(cluster_sizes)
+                        score += (max_cluster_size - avg_cluster) / len(persons)
+
                     except:
                         score += 0.1
                         
