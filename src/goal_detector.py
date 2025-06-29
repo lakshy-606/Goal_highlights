@@ -13,14 +13,13 @@ logger = logging.getLogger(__name__)
 
 class FootballGoalDetector:
     def __init__(self):
-        """Initialize the goal detector with YOLO model and detection parameters."""
-        self.model = YOLO('yolov8n.pt')  # Use YOLOv8 nano for CPU efficiency
+        self.model = YOLO('yolov8n.pt')  
         self.confidence_threshold = config.CONFIDENCE_THRESHOLD
         self.nms_threshold = config.NMS_THRESHOLD
         self.goal_indicators = []
         
     def detect_objects(self, frame: np.ndarray) -> dict:
-        """Detect objects in a frame using YOLO."""
+        """Detect objects in a frame using YOLOv8n."""
         results = self.model(frame, conf=self.confidence_threshold, iou=self.nms_threshold, verbose=False)
         
         detections = {
@@ -85,7 +84,7 @@ class FootballGoalDetector:
             score = 0.0
             persons = detections.get('persons', [])
             
-            if len(persons) >= 4:
+            if len(persons) >= 3:
                 positions = [[p['bbox'][0] + p['bbox'][2]/2, p['bbox'][1] + p['bbox'][3]/2] 
                            for p in persons]
                 
@@ -107,33 +106,44 @@ class FootballGoalDetector:
             
         return celebration_scores
 
-    def calculate_goal_probability(self, 
-                                 celebration_scores: List[float],
-                                 ball_scores: List[float],
-                                 detections_history: List[dict]) -> List[float]:
-        """Calculate goal probability for each frame."""
+    def calculate_goal_probability(
+            self,
+            celebration_scores: List[float],
+            ball_scores: List[float],
+            detections_history: List[dict],
+        ) -> List[float]:
+        """Calculate goal probability using sliding window of ball and celebration cues."""
+        num_frames = len(detections_history)
+        window_size = 50
+
+        # Normalize scores to 0-1
+        celebration_scores = np.array(celebration_scores)
+        ball_scores = np.array(ball_scores)
+        if celebration_scores.max() > 0:
+            celebration_scores = celebration_scores / celebration_scores.max()
+        if ball_scores.max() > 0:
+            ball_scores = ball_scores / ball_scores.max()
+
         goal_probabilities = []
-        
-        celebration_scores = np.array(celebration_scores) if celebration_scores else np.array([0])
-        ball_scores = np.array(ball_scores) if ball_scores else np.array([0])
-        
-        if np.max(celebration_scores) > 0:
-            celebration_scores = celebration_scores / np.max(celebration_scores)
-        if np.max(ball_scores) > 0:
-            ball_scores = ball_scores / np.max(ball_scores)
-            
-        for i in range(len(detections_history)):
-            celebration_score = celebration_scores[i] if i < len(celebration_scores) else 0
-            ball_score = ball_scores[i] if i < len(ball_scores) else 0
-            
-            goal_prob = (
-                0.35 * celebration_score + 
-                0.65 * ball_score          
-            )
-            
+
+        for i in range(num_frames):
+            # Define window ranges
+            ball_start = max(i - window_size // 2, 0)
+            ball_end = min(i + window_size // 2, num_frames)
+
+            celeb_start = i
+            celeb_end = min(i + window_size, num_frames)
+
+            # Sliding max scores in window
+            max_ball = np.max(ball_scores[ball_start:ball_end]) if ball_end > ball_start else 0
+            max_celeb = np.max(celebration_scores[celeb_start:celeb_end]) if celeb_end > celeb_start else 0
+
+            # Weighted goal probability
+            goal_prob = 0.65 * max_ball + 0.35 * max_celeb
             goal_probabilities.append(goal_prob)
-            
+
         return goal_probabilities
+
 
     def find_goal_moments(self, goal_probabilities: List[float], fps: float) -> List[float]:
         """Find potential goal moments using peak detection."""
