@@ -31,6 +31,4 @@ OUTPUT_FORMAT = 'mp4'
 OUTPUT_QUALITY = 'medium'
 OUTPUT_PREFIX = 'goal_highlight_'
 
-# Debug Configuration
-DEBUG_MODE = os.getenv('DEBUG_MODE', 'False').lower() == 'true'
-SAVE_INTERMEDIATE_FRAMES = DEBUG_MODE 
+
