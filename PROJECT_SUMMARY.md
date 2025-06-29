@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project implements an end-to-end pipeline for automatically detecting goals in football match videos and generating highlight clips. It combines object detection, heuristic scoring, and cloud integration into a single streamlined system.
+This project implements an end-to-end pipeline for automatically detecting goals in football match videos and generating highlight clips. It combines object detection and cloud integration into a single streamlined system.
 
 ## Key Features
 
